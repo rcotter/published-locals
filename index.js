@@ -6,12 +6,34 @@ var util = require('util');
 var refFormatCode = "module.exports = require('%s');";
 
 
-function getPackageJson() {
+function getConfig(packageJsonConfigKey) {
     "use strict";
 
     var pathToPackageJson = path.join(process.cwd(), "package.json");
-    console.log(pathToPackageJson);
-    return JSON.parse(fs.readFileSync(pathToPackageJson));
+    var packageJsonData = fs.readFileSync(pathToPackageJson);
+    if (!packageJsonData) {
+        return "Cannot find " + pathToPackageJson;
+    }
+
+    var packageJson = JSON.parse(packageJsonData);
+    return packageJson[packageJsonConfigKey || "localDependencies"] || {};
+}
+
+
+function projectFileExists(relativeFilePath) {
+    "use strict";
+
+    var filePath = path.resolve(process.cwd(), relativeFilePath);
+    return fs.existsSync(filePath);
+}
+
+
+function createReferenceFile(referenceFolderPath, sourceFilePath) {
+    "use strict";
+
+    fs.mkdirSync(referenceFolderPath);
+    var referenceFilePath = path.join(referenceFolderPath, "index.js");
+    fs.writeFileSync(referenceFilePath, util.format(refFormatCode, path.join('../../', sourceFilePath)));
 }
 
 
@@ -19,31 +41,19 @@ module.exports = function setup(packageJsonConfigKey) {
     "use strict";
 
     var nodeModulesPath = path.resolve(process.cwd(), "node_modules");
-    var packageJson = getPackageJson();
-    var config = packageJson[packageJsonConfigKey || "localDependencies"] || {};
+    var config = getConfig(packageJsonConfigKey);
 
     for (var moduleName in config) {
-        var relFilePath = config[moduleName];
-        console.log(relFilePath);
-        var filePath = path.resolve(process.cwd(), relFilePath);
-        console.log(moduleName + " " + filePath);
-
-        if (!fs.existsSync(filePath)) {
-            console.log("Missing " + filePath);
-            return "Missing " + filePath;
+        var sourceFilePath = config[moduleName];
+        if (!projectFileExists(sourceFilePath)) {
+            return "Cannot find " + sourceFilePath;
         }
 
-        var refFolderPath = path.join(nodeModulesPath, moduleName);
-        if (fs.existsSync(refFolderPath)) {
-            console.log("Module already exists");
+        var referenceFolderPath = path.join(nodeModulesPath, moduleName);
+        if (fs.existsSync(referenceFolderPath)) {
             continue;
         }
 
-        fs.mkdirSync(refFolderPath);
-        console.log(refFolderPath);
-
-        var refFilePath = path.join(refFolderPath, "index.js");
-        console.log(refFilePath);
-        fs.writeFileSync(refFilePath, util.format(refFormatCode, path.join('../../', relFilePath)));
+        createReferenceFile(referenceFolderPath, sourceFilePath);
     }
 };
