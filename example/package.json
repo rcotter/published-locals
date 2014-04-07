@@ -1,0 +1,8 @@
+{
+  "name": "published-locals-test",
+  "version": "0.0.1",
+  "localDependencies": {
+    "config": "./config.js"
+  },
+  "dependencies": {}
+}

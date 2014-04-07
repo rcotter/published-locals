@@ -1,0 +1,28 @@
+{
+    "name": "published-locals",
+    "version": "1.0.0",
+    "description": "'require' project specific modules/files just like 3rd party ones i.e. no relative paths. Great for project config.",
+    "main": "index.js",
+    "scripts": {
+        "test": "make test"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/rcotter/locals-to-globals.git"
+    },
+    "keywords": [
+        "require",
+        "local",
+        "global",
+        "singleton",
+        "module",
+        "config"
+    ],
+    "author": "Rick Cotter",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/rcotter/published-locals/issues"
+    },
+    "homepage": "https://github.com/rcotter/published-locals",
+    "dependencies": {}
+}
